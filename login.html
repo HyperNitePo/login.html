@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="icon" href="favicon.ico">
+    <meta charset="UTF-8" name="viewport" content="width=device-width,initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.4.1/vuetify.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+    <title>Login</title>
+</head>
+<body>
+    <div id="app">
+        <v-app style="background-image: url('./test-bg.jpg'); background-position: center; background-repeat: no-repeat;">
+            <v-card flat class="transparent">
+                <v-toolbar flat class="warning darken-4 white--text">
+                    <v-toolbar-title>HyperNology Co.</v-toolbar-title>
+                </v-toolbar>
+                <v-layout class="row justify-center pl-3 pr-3">
+                    <v-flex :class="isMobile ? 'xs12' : 'xs3'">
+                        <v-card class="card--flex-toolbar">
+                            <v-toolbar card prominent>
+                                <v-toolbar-title class="headline">{{login ? '登入' : '註冊'}}</v-toolbar-title>
+
+                                <v-spacer></v-spacer>
+
+                                <v-tooltip top>
+                                    <v-btn :icon="isMobile" slot="activator" :disabled="!login || loading" @click="login = false" :color="isMobile ? 'default' : 'info'">
+                                        <v-icon :left="!isMobile">person_add</v-icon>
+                                        {{isMobile ? '' : '註冊'}}
+                                    </v-btn>
+                                    <span>點擊此以進行註冊</span>
+                                </v-tooltip>
+
+                                <v-tooltip top>
+                                <v-btn :icon="isMobile" slot="activator" :disabled="login || loading" @click="login = true" :color="isMobile ? 'default' : 'info'">
+                                    <v-icon :left="!isMobile">person</v-icon>
+                                    {{isMobile ? '' : '登入'}}
+                                </v-btn>
+                                    <span>點擊此以進行登入</span>
+                                </v-tooltip>
+                            </v-toolbar>
+                            <v-divider></v-divider>
+                            <v-card-text style="min-height: 250px">
+                                <v-form v-model="login_form.valid" rel="form" v-if="login">
+                                    <v-text-field label="用戶名稱或電子郵件" v-model="login_form.username" :rules="[v => !!v || '必填']"></v-text-field>
+                                    <v-text-field label="密碼" type="password" v-model="login_form.password" :rules="[v => !v.toString().match(' ') || '你的密碼含空白字元',v => !!v || '必填']"></v-text-field>
+                                    <v-btn color="primary" :disabled="!login_form.valid || loading" :loading="loading" @click="login_click()">登入</v-btn>
+                                </v-form>
+                                <v-form v-else rel="form" v-model="register_form.valid">
+                                    <v-text-field label="用戶名" v-model="register_form.username" :rules="[v => (v.toString().length >=6 && v.toString().length <=12) || '字元長度需要介乎 6 ~ 12字元',v => !!v || '必填']"></v-text-field>
+                                    <v-text-field label="電子郵件" v-model="register_form.email" :rules="[v => /.+@.+/.test(v) || '電郵格式不正確',v => !!v || '必填']"></v-text-field>
+                                    <v-text-field type="password" label="密碼" v-model="register_form.password" :rules="password_check"></v-text-field>
+                                    <v-text-field type="password" label="確認密碼" v-model="ensure_pw" :rules="[v => v.toString() === register_form.password || '兩者密碼不正確', v => !!v || '必填']"></v-text-field>
+                                    <v-btn color="success" :disabled="!register_form.valid || loading" :loading="loading" @click="register()">註冊</v-btn>
+                                </v-form>
+                            </v-card-text>
+                        </v-card>
+                    </v-flex>
+                </v-layout>
+            </v-card>
+        </v-app>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.21/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.4.1/vuetify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#app',
+        data: {
+            login: true,
+            weak_passwords: [
+                "12345678",
+                "password",
+                "87654321",
+                "Password",
+                "PASSWORD",
+                "P@ssw0rd"
+            ],
+            password_check: [v => v.toString().length >= 8 || '字元長度需要達到8字元', v => !vm.weak_passwords.includes(v.toString()) || '你的密碼不安全', v => !v.toString().match(' ') || '你的密碼含空白字元'],
+            login_form: {
+                valid: false,
+                username: '',
+                password: ''
+            },
+            register_form: {
+                valid: false,
+                username: '',
+                password: '',
+                email: ''
+            },
+            isMobile: false,
+            loading: false,
+            ensure_pw: '',
+        },
+        methods: {
+            login_click() {
+                this.loading = true;
+                axios({
+                    method: 'POST',
+                    url: 'https://test.hypernite.com/eric/test.php',
+                    data: {
+                        username: this.login_form.username,
+                        password: this.login_form.password
+                    }
+                }).then(res=>{
+                    this.loading = false;
+                    window.alert('ok')
+                }).catch(err=>{
+                    this.loading = false;
+                    window.alert(err)
+                })
+            },
+            register(){
+                this.loading = true;
+                axios({
+                    method: 'POST',
+                    url: 'https://test.hypernite.com/eric/test.php',
+                    data: {
+                        username: this.register_form.username,
+                        password: this.register_form.password,
+                        email: this.register_form.email
+                    }
+                }).then(res=>{
+                    this.loading = false;
+                    window.alert('ok')
+                }).catch(err=>{
+                    this.loading = false;
+                    window.alert(err)
+                })
+            }
+        },
+        mounted() {
+            this.isMobile = this.$vuetify.breakpoint.mdAndDown;
+        }
+    })
+</script>
+<style>
+    .card--flex-toolbar {
+        margin-top: 45%;
+    }
+    * {
+        font-family: "Microsoft JhengHei UI",fantasy;
+    }
+</style>
+</html>
