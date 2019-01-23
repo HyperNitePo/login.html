@@ -18,7 +18,7 @@
                 </v-toolbar>
                 <v-layout class="row justify-center pl-3 pr-3">
                     <v-flex :class="isMobile ? 'xs12' : 'xs3'">
-                        <v-card class="card--flex-toolbar" raised style="border-radius: 6px">
+                        <v-card class="card--flex-toolbar" raised style="border-radius: 6px" v-if="state === 'normal'">
                             <v-toolbar card prominent>
                                 <v-toolbar-title class="headline">{{login ? '登入' : '註冊'}}</v-toolbar-title>
 
@@ -55,6 +55,14 @@
                                     <v-btn color="success" :disabled="!register_form.valid || loading" :loading="loading" @click="register()">註冊</v-btn>
                                 </v-form>
                             </v-card-text>
+                        </v-card>
+                        <v-card class="card--flex-toolbar" raised style="border-radius: 6px" v-else>
+                          <v-card-title class="headline">
+                          {{ state === 'login-success' ? 'Login Success !!' : 'Register Success !!' }}
+                          <v-spacer></v-spacer>
+                          <v-btn class="primary" @click="state = 'normal'">Back</v-btn>
+                          </v-card-title>
+                         
                         </v-card>
                     </v-flex>
                 </v-layout>
@@ -93,6 +101,7 @@
             isMobile: false,
             loading: false,
             ensure_pw: '',
+            state: 'normal',
         },
         methods: {
             login_click() {
@@ -106,7 +115,7 @@
                     }
                 }).then(res=>{
                     this.loading = false;
-                    window.alert('ok')
+                    this.state = 'login-success'
                 }).catch(err=>{
                     this.loading = false;
                     window.alert(err)
@@ -123,8 +132,8 @@
                         email: this.register_form.email
                     }
                 }).then(res=>{
-                    this.loading = false;
-                    window.alert('ok')
+                    this.loading =false;
+                    this.state = 'register-success'
                 }).catch(err=>{
                     this.loading = false;
                     window.alert(err)
